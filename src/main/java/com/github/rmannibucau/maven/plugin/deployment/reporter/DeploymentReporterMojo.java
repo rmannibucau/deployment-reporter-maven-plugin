@@ -14,9 +14,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -46,6 +50,8 @@ public class DeploymentReporterMojo extends AbstractEventSpy {
 
     private String output;
 
+    private Collection<String> alreadyAdded;
+
     @Override
     public void init(final Context context) {
         output = Properties.class.cast(context.getData().get("systemProperties")).getProperty("deployment-reporter.output",
@@ -58,8 +64,9 @@ public class DeploymentReporterMojo extends AbstractEventSpy {
             switch (ExecutionEvent.class.cast(event).getType()) {
             case SessionStarted:
                 jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
+                alreadyAdded = new HashSet<>();
                 deployments = new Deployments();
-                deployments.deployments = new ArrayList<>();
+                deployments.deployments = new TreeSet<>(Comparator.comparing(e -> e.artifact));
                 break;
             case SessionEnded:
                 if (!deployments.deployments.isEmpty()) {
@@ -91,6 +98,10 @@ public class DeploymentReporterMojo extends AbstractEventSpy {
     }
 
     private void onDeployment(final String artifact, final File file) {
+        if (!alreadyAdded.add(artifact)) {
+            return;
+        }
+
         final String name = file.getName();
         final Deployment deployment = new Deployment();
         deployment.artifact = artifact;
