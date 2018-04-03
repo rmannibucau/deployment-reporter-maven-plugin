@@ -1,0 +1,19 @@
+= Deployment Reporter
+
+== Installation
+
+Put in $MAVEN_HOME/lib.ext:
+
+- deployment-reporter-maven-plugin-1.0-SNAPSHOT.jar
+- geronimo-json_1.1_spec-1.0.jar
+- geronimo-jsonb_1.0_spec-1.0.jar
+- johnzon-core-1.1.7.jar
+- johnzon-jsonb-1.1.7.jar
+- johnzon-mapper-1.1.7.jar
+
+== Run
+
+Run your build (optionally you can set where to output the report using `-Ddeployment-reporter.output=/path/to/report.json`).
+
+By default report is dumped when the maven session ends and it uses the maven logger.
+
